@@ -1,37 +1,44 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { MdAddShoppingCart } from 'react-icons/md';
+import { formatPrice } from '../../util/format';
 
 import api from '../../service/api';
 
+import * as CartActions from '../../store/modules/cart/actions';
+
 import { ProductList } from './styles';
 
-export default class Home extends Component {
+class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
       products: [],
-      amount: '',
-      loading: false,
     };
   }
 
   async componentDidMount() {
-    const { products } = this.state;
-    const response = await api.get('/products');
+    const response = await api.get('products');
+
+    const data = response.data.map(product => ({
+      ...product,
+      priceFormatted: formatPrice(product.price),
+    }));
 
     this.setState({
-      products: [...products, response.data],
-      amount: '',
-      loading: true,
+      products: data,
     });
   }
 
-  render() {
-    const { products, amount, loading } = this.state;
+  handleAddProduct = product => {
+    const { addToCart } = this.props;
 
-    if (loading) {
-      return <h1>Loading</h1>;
-    }
+    addToCart(product);
+  };
+
+  render() {
+    const { products } = this.state;
 
     return (
       <ProductList>
@@ -39,11 +46,13 @@ export default class Home extends Component {
           <li key={product.id}>
             <img src={product.image} alt={product.title} />
             <strong>{product.title}</strong>
-            <span>{product.price}</span>
-            <button type="button">
+            <span>{product.priceFormatted}</span>
+            <button
+              type="button"
+              onClick={() => this.handleAddProduct(product)}
+            >
               <div>
-                <MdAddShoppingCart size={16} color="#fff" />{' '}
-                {amount[product.id] || 0}
+                <MdAddShoppingCart size={16} color="#fff" />
               </div>
               <span>ADICIONAR AO CARRINHO</span>
             </button>
@@ -53,3 +62,7 @@ export default class Home extends Component {
     );
   }
 }
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(CartActions, dispatch);
+
+export default connect(null, mapDispatchToProps)(Home);

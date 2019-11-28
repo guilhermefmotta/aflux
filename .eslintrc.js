@@ -22,5 +22,7 @@ module.exports = {
     'import/no-useless-path-segments': 'off',
     'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.js'] }],
     'import/prefer-default-export': 'off',
+    'no-param-reassign': 'off',
+    'no-console': ['error', { allow: ['tron'] }],
   },
 };
